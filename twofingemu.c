@@ -615,8 +615,7 @@ char* getWindowClass(Window w) {
 
 /* Returns whether the given window is blacklisted */
 int isWindowBlacklisted(Window w) {
-	if(w == None) return 0;
-
+	if (w == None) return 1;
 	return isWindowBlacklistedForGestures(w);
 }
 
