@@ -552,19 +552,33 @@ Profile* getDefaultProfile() {
  * window, or defaultProfile if there is no specific profile for it or the window is invalid. */
 Profile* getWindowProfile(Window w) {
 	if (w != None) {
+
 		char* class = getWindowClass(w);
-		if (class != NULL) {
+
+		if(class != NULL) {
 			if(inDebugMode()) {
 				printf("Current window: '%s'\n", class);
 			}
-			if (!strncmp(class, "opencpn", 30)) {
-				free(class);
-				return &defaultProfile;
+
+			int i;
+			/* Look for the profile with this class */
+			for (i = 0; i < profileCount; i++) {
+				if (!strncmp(class, profiles[i].windowClass, 30)) {
+					free(class);
+					/* Return this profile */
+					return &profiles[i];
+				}
 			}
-			free(class);			
-		} 
+
+			/* No profile found, return default. */
+			free(class);
+			return &defaultProfile;
+		} else {
+			return &defaultProfile;
+		}
+	} else {
+		return &defaultProfile;
 	}
-	return &noopProfile;
 }
 
 int isWindowBlacklistedForGestures(Window w) {
