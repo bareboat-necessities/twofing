@@ -551,7 +551,20 @@ Profile* getDefaultProfile() {
 /* Returns a pointer to the profile of the currently selected
  * window, or defaultProfile if there is no specific profile for it or the window is invalid. */
 Profile* getWindowProfile(Window w) {
-	return getDefaultProfile();
+	if (w != None) {
+		char* class = getWindowClass(w);
+		if (class != NULL) {
+			if(inDebugMode()) {
+				printf("Current window: '%s'\n", class);
+			}
+			if (strncmp(class, "opencpn", 30) == 0) {
+				free(class);
+				return &defaultProfile;
+			}
+			free(class);			
+		} 
+	}
+	return &noopProfile;
 }
 
 int isWindowBlacklistedForGestures(Window w) {
