@@ -557,7 +557,7 @@ Profile* getWindowProfile(Window w) {
 			if(inDebugMode()) {
 				printf("Current window: '%s'\n", class);
 			}
-			if (strncmp(class, "opencpn", 30) == 0) {
+			if (!strncmp(class, "opencpn", 30)) {
 				free(class);
 				return &defaultProfile;
 			}
