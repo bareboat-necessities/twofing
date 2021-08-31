@@ -221,7 +221,7 @@ Profile profiles[] = {
 
 
 /* Default (fallback) profile */
-Profile defaultProfile = {	.windowClass = NULL,
+Profile defaultProfile = {	.windowClass = "opencpn",
 				.scrollInherit = 0,
 				.hscrollStep = 40,
 				.vscrollStep = 40,
@@ -246,6 +246,33 @@ Profile defaultProfile = {	.windowClass = NULL,
 				.rotateStep = 90,
 				.tapInherit = 0,
 				.tapAction = { ACTIONTYPE_BUTTONPRESS, 3, 0	}
+			  };
+
+Profile noopProfile = {		.windowClass = NULL,
+				.scrollInherit = 0,
+				.hscrollStep = 40,
+				.vscrollStep = 40,
+				.scrollMinDistance = 50,
+				.scrollBraceAction = { ACTIONTYPE_NONE, 0, 0 },
+				.scrollUpAction = { ACTIONTYPE_NONE, 0, 0 },
+				.scrollDownAction = { ACTIONTYPE_NONE, 0, 0 },
+				.scrollLeftAction = { ACTIONTYPE_NONE, 0, 0 },
+				.scrollRightAction = { ACTIONTYPE_NONE, 0, 0 },
+				.scrollEasing = 0,
+				.zoomInherit = 0,
+				.zoomMinDistance = 80,
+				.zoomInAction = { ACTIONTYPE_NONE, 0, 0 },
+				.zoomOutAction = { ACTIONTYPE_NONE, 0, 0 },
+				.zoomStep = 1.5,
+				.zoomMinFactor = 1.5,
+				.rotateInherit = 0,
+				.rotateMinDistance = 10000,
+				.rotateMinAngle = 370,
+				.rotateLeftAction = { ACTIONTYPE_NONE, 0, 0 },
+				.rotateRightAction = { ACTIONTYPE_NONE, 0, 0 },
+				.rotateStep = 90,
+				.tapInherit = 0,
+				.tapAction = { ACTIONTYPE_NONE, 0, 0 }
 			  };
 
 #endif /* PROFILES_H_ */
