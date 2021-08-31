@@ -248,5 +248,12 @@ Profile defaultProfile = {	.windowClass = NULL,
 				.tapAction = { ACTIONTYPE_BUTTONPRESS, 3, 0	}
 			  };
 
+Profile noopProfile = {	        .windowClass = NULL,
+				.scrollInherit = 1,
+				.zoomInherit = 1,
+				.rotateInherit = 1,
+				.tapInherit = 1
+			  };
+
 
 #endif /* PROFILES_H_ */
