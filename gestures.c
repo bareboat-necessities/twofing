@@ -582,16 +582,35 @@ Profile* getWindowProfile(Window w) {
 }
 
 int isWindowBlacklistedForGestures(Window w) {
+	int i;
 	char* class = getWindowClass(w);
+
 	if (class != NULL) {
-		if(inDebugMode()) printf("Found window with id %i and class '%s' \n", (int) w, class);
-		if (strncmp(class, "opencpn", 30) == 0) {
-			free(class);
-			return 0;
+		if(inDebugMode()) printf("Found window with id %i and class '%s' \n", (int) w,
+					class);
+
+		for (i = 0; blacklist[i] != NULL; i++) {
+			if (strncmp(class, blacklist[i], 30) == 0) {
+				free(class);
+				return 1;
+			}
 		}
+		
+		/* Not blacklisted. Check if is on wmBlacklist */
+		for(i = 0; wmBlacklist[i] != NULL; i++) {
+			if (strncmp(class, wmBlacklist[i], 30) == 0) {
+				free(class);
+				if(inDebugMode()) printf("Look for child\n");
+				return isWindowBlacklisted(getLastChildWindow(w));
+			}
+		}
+
 		free(class);
-		return 1;
+		return 0;
 	} else {
-		return 1;
+		if(inDebugMode()) printf("Found window with id %i and no class.\n", (int) w);
+		//if(inDebugMode()) printf("Look for another child\n");
+		return isWindowBlacklisted(getLastChildWindow(w));
+		return 0;
 	}
 }
