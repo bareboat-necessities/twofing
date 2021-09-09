@@ -120,7 +120,7 @@ TimeVal* getEasingStepTimeVal()
 	if(easingActive) {
 		return &easingStepTimeVal;
 	} else {
-		if (nonEasingTimeVal.tv_sec <= 0) nonEasingTimeVal.tv_sec = 1;
+		if (nonEasingTimeVal.tv_sec <= 0 && nonEasingTimeVal.tv_usec <= 0) nonEasingTimeVal.tv_sec = 1;
 		return &nonEasingTimeVal;
 	}
 }
