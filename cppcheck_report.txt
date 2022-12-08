@@ -1,0 +1,15 @@
+twofingemu.c:627:3: warning: %i in format string (no. 1) requires 'int' but the argument type is 'unsigned int'. [invalidPrintfArgType_sint]
+  printf("New screen size: %i x %i\n", screenWidth, screenHeight);
+  ^
+twofingemu.c:627:3: warning: %i in format string (no. 2) requires 'int' but the argument type is 'unsigned int'. [invalidPrintfArgType_sint]
+  printf("New screen size: %i x %i\n", screenWidth, screenHeight);
+  ^
+twofingemu.c:87:2: error: Resource leak: r [resourceLeak]
+ r = freopen("/dev/null", "w", stdout);
+ ^
+twofingemu.c:88:2: error: Resource leak: r [resourceLeak]
+ r = freopen("/dev/null", "w", stderr);
+ ^
+twofingemu.c:89:4: warning: Redundant assignment of 'r' to itself. [selfAssignment]
+ r = r;
+   ^
