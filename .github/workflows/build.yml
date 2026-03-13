@@ -1,0 +1,144 @@
+name: build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: debian-trixie (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: amd64
+            runs_on: ubuntu-latest
+          - name: arm64
+            runs_on: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runs_on }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute artifact metadata
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "ARTIFACT_TAG=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+            echo "DEB_VERSION=${GITHUB_REF_NAME#v}-1~trixie1" >> "$GITHUB_ENV"
+          else
+            echo "ARTIFACT_TAG=sha-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+            echo "DEB_VERSION=0.0.0+sha${GITHUB_SHA::7}-1~trixie1" >> "$GITHUB_ENV"
+          fi
+          echo "DEB_ARCH=$(dpkg --print-architecture)" >> "$GITHUB_ENV"
+
+      - name: Build Debian Trixie package
+        run: |
+          set -euo pipefail
+
+          PKG="twofing"
+          STAGE="pkgroot"
+
+          rm -rf "$STAGE"
+
+          docker run --rm \
+            -v "$PWD:/src" \
+            -w /src \
+            debian:trixie \
+            bash -lc '
+              set -euo pipefail
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y --no-install-recommends \
+                build-essential make pkg-config fakeroot dpkg-dev \
+                libx11-dev libxtst-dev libxi-dev libxrandr-dev
+
+              make clean
+              make
+
+              install -d \
+                "'"$STAGE"'"/DEBIAN \
+                "'"$STAGE"'"/usr/bin \
+                "'"$STAGE"'"/etc/udev/rules.d \
+                "'"$STAGE"'"/usr/share/doc/'"$PKG"'"
+
+              install -m 0755 '"$PKG"' "'"$STAGE"'"/usr/bin/'"$PKG"'"
+              cp -f rules/*.rules "'"$STAGE"'"/etc/udev/rules.d/
+              [ -f README.md ] && install -m 0644 README.md "'"$STAGE"'"/usr/share/doc/'"$PKG"'"/README.md || true
+              [ -f LICENSE ] && install -m 0644 LICENSE "'"$STAGE"'"/usr/share/doc/'"$PKG"'"/copyright || true
+
+              SIZE_KB="$(du -sk "'"$STAGE"'"/usr "'"$STAGE"'"/etc | awk "{s+=\$1} END {print s}")"
+
+              cat > "'"$STAGE"'"/DEBIAN/control <<EOF
+              Package: '"$PKG"'
+              Version: '"${DEB_VERSION}"'
+              Section: utils
+              Priority: optional
+              Architecture: '"${DEB_ARCH}"'
+              Maintainer: ${GITHUB_REPOSITORY} <noreply@github.com>
+              Depends: libc6, libx11-6, libxi6, libxrandr2, libxtst6
+              Installed-Size: ${SIZE_KB}
+              Homepage: https://github.com/${GITHUB_REPOSITORY}
+              Description: twofing daemon
+               Recognizes two-finger gestures and emits mouse/keyboard events.
+              EOF
+
+              fakeroot dpkg-deb --build "'"$STAGE"'" "'"$PKG"'"_'"${DEB_VERSION}"'_'"${DEB_ARCH}"'.deb
+            '
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-trixie-${{ matrix.name }}
+          path: twofing_${{ env.DEB_VERSION }}_${{ env.DEB_ARCH }}.deb
+
+  publish:
+    name: publish to GitHub Release (+ APT repo)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Build flat APT repository (Packages/Release)
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils
+
+          rm -rf apt-repo
+          mkdir -p apt-repo
+
+          cp -v release-assets/debian-trixie-amd64/*.deb apt-repo/
+          cp -v release-assets/debian-trixie-arm64/*.deb apt-repo/
+
+          pushd apt-repo >/dev/null
+          dpkg-scanpackages --multiversion . /dev/null > Packages
+          gzip -9c Packages > Packages.gz
+          apt-ftparchive release . > Release
+          popd >/dev/null
+
+      - name: Publish versioned release (tag v*)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/debian-trixie-amd64/*.deb
+            release-assets/debian-trixie-arm64/*.deb
+            apt-repo/*
+
+      - name: Publish/update stable APT release (tag "apt")
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apt
+          name: APT repository (stable)
+          target_commitish: ${{ github.sha }}
+          files: |
+            apt-repo/*
