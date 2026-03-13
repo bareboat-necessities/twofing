@@ -49,6 +49,7 @@ jobs:
           docker run --rm \
             -v "$PWD:/src" \
             -w /src \
+            -e GITHUB_REPOSITORY="${GITHUB_REPOSITORY}" \
             debian:trixie \
             bash -lc '
               set -euo pipefail
@@ -75,18 +76,18 @@ jobs:
               SIZE_KB="$(du -sk "'"$STAGE"'"/usr "'"$STAGE"'"/etc | awk "{s+=\$1} END {print s}")"
 
               cat > "'"$STAGE"'"/DEBIAN/control <<EOF
-              Package: '"$PKG"'
-              Version: '"${DEB_VERSION}"'
-              Section: utils
-              Priority: optional
-              Architecture: '"${DEB_ARCH}"'
-              Maintainer: ${GITHUB_REPOSITORY} <noreply@github.com>
-              Depends: libc6, libx11-6, libxi6, libxrandr2, libxtst6
-              Installed-Size: ${SIZE_KB}
-              Homepage: https://github.com/${GITHUB_REPOSITORY}
-              Description: twofing daemon
-               Recognizes two-finger gestures and emits mouse/keyboard events.
-              EOF
+Package: '"$PKG"'
+Version: '"${DEB_VERSION}"'
+Section: utils
+Priority: optional
+Architecture: '"${DEB_ARCH}"'
+Maintainer: ${GITHUB_REPOSITORY} <noreply@github.com>
+Depends: libc6, libx11-6, libxi6, libxrandr2, libxtst6
+Installed-Size: ${SIZE_KB}
+Homepage: https://github.com/${GITHUB_REPOSITORY}
+Description: twofing daemon
+ Recognizes two-finger gestures and emits mouse/keyboard events.
+EOF
 
               fakeroot dpkg-deb --build "'"$STAGE"'" "'"$PKG"'"_'"${DEB_VERSION}"'_'"${DEB_ARCH}"'.deb
             '
