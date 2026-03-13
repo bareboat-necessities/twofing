@@ -76,17 +76,17 @@ jobs:
               SIZE_KB="$(du -sk "'"$STAGE"'"/usr "'"$STAGE"'"/etc | awk "{s+=\$1} END {print s}")"
 
               {
-                printf 'Package: %s\n' "'"$PKG"'"
-                printf 'Version: %s\n' "'"${DEB_VERSION}"'"
-                printf 'Section: utils\n'
-                printf 'Priority: optional\n'
-                printf 'Architecture: %s\n' "'"${DEB_ARCH}"'"
-                printf 'Maintainer: %s <noreply@github.com>\n' "${GITHUB_REPOSITORY}"
-                printf 'Depends: libc6, libx11-6, libxi6, libxrandr2, libxtst6\n'
-                printf 'Installed-Size: %s\n' "${SIZE_KB}"
-                printf 'Homepage: https://github.com/%s\n' "${GITHUB_REPOSITORY}"
-                printf 'Description: twofing daemon\n'
-                printf ' Recognizes two-finger gestures and emits mouse/keyboard events.\n'
+                printf "Package: %s\n" "'"$PKG"'"
+                printf "Version: %s\n" "'"${DEB_VERSION}"'"
+                printf "Section: utils\n"
+                printf "Priority: optional\n"
+                printf "Architecture: %s\n" "'"${DEB_ARCH}"'"
+                printf "Maintainer: %s <noreply@github.com>\n" "${GITHUB_REPOSITORY}"
+                printf "Depends: libc6, libx11-6, libxi6, libxrandr2, libxtst6\n"
+                printf "Installed-Size: %s\n" "${SIZE_KB}"
+                printf "Homepage: https://github.com/%s\n" "${GITHUB_REPOSITORY}"
+                printf "Description: twofing daemon\n"
+                printf " Recognizes two-finger gestures and emits mouse/keyboard events.\n"
               } > "'"$STAGE"'"/DEBIAN/control
 
               fakeroot dpkg-deb --build "'"$STAGE"'" "'"$PKG"'"_'"${DEB_VERSION}"'_'"${DEB_ARCH}"'.deb
