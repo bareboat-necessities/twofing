@@ -4,6 +4,27 @@ twofing is a daemon which runs in the background and recognizes two-finger gestu
 
 # Installation
 
+## Install from GitHub APT repository (Debian Trixie)
+
+For tagged releases (`v*`), CI publishes:
+
+- architecture-specific `.deb` packages
+- a flat APT repository (`Packages`, `Packages.gz`, `Release`)
+
+You can consume the stable flat repository from the `apt` release tag:
+
+```bash
+echo "deb [trusted=yes] https://github.com/twofing/twofing/releases/download/apt ./" | \
+  sudo tee /etc/apt/sources.list.d/twofing-github.list
+
+sudo apt-get update
+sudo apt-get install twofing
+```
+
+> Note: the published repository is currently unsigned, so `trusted=yes` is required.
+
+## Build from source
+
 ```
 sudo apt-get install \
   build-essential \
