@@ -14,7 +14,7 @@ For tagged releases (`v*`), CI publishes:
 You can consume the stable flat repository from the `apt` release tag:
 
 ```bash
-echo "deb [trusted=yes] https://github.com/bareboat-necessities/twofing/releases/0.7.3/ ./" | \
+echo "deb [trusted=yes] https://github.com/bareboat-necessities/twofing/releases/download/v0.7.3/ ./" | \
   sudo tee /etc/apt/sources.list.d/twofing-github.list
 
 sudo apt-get update
